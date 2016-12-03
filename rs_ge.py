@@ -20,16 +20,7 @@ def description(id):
 def name(id):
     return((json.loads(info(id))['item']['name']))
 
-def peak(array):
-    #this prints max
-    maxnum = -999999
-    for i in range(1,len(array)):
-        if(int(array[i]) > int(maxnum)):
-            maxnum = array[i]
-    print("The maximum price over the past 180 days is: " + maxnum)
-    return maxnum
-
-def get_prices(id):
+def get_data(id):
     item_json = json.loads(requests.get(graphstring % id).text)['daily']
     stamps = []
     for s in item_json.keys():
@@ -42,34 +33,10 @@ def get_prices(id):
     print("The minimum price over the past 180 days for %s is: %s" % (str(id), str(min(prices))))
     average = int(sum(prices) / len(prices))
     print("The average price is: " + str(average))
-    return prices
-
-def math(PriceArray, Average, id):
-    ############ calc average
-    average = []
-    test = 0
-    for x in range(1,len(PriceArray)):
-        test += int(PriceArray[x-1])
-        average.append(test/x)
-        
-    ############
-
-    
-
-    #Graphing...
-    plt.plot(PriceArray)
-    plt.plot(average)
-    plt.ylabel('Price of: ' + name(id) + ' (' + description(id) + ')')
-    plt.xlabel("Time in days (previous 180 days)")
-    plt.show()
-    return 0
-
-def get_stdev(id):
-    item_data = get_prices(id)
-    stdev = np.std(item_data)
+    stdev = np.std(prices)
     print("The standard deviation is %s." % str(stdev))
-    return stdev
     
+    return {'prices':prices, 'min_price':min(prices), 'max_price':max(prices), 'avg_price':average, 'stdev':stdev}
 
 def getrend(id):
     print(str(json.loads(info(id))['item']))
@@ -78,15 +45,15 @@ def main():
     from time import sleep
     json_text = open("objects.json", "r").read()
     json_data = json.loads(json_text)
-    stdevs = {}
+    object_info = {}
     for item in json_data:
-        new_stdev = get_stdev(item['id'])
-        stdevs[item['name']] = new_stdev
-        sleep(5)
+        new_obj_data = get_data(item['id'])
+        object_info[item['name']] = new_obj_data
 
-    dump_string = json.dumps(stdevs, ensure_ascii=False)
-    with open("stdevs.json", "r") as f:
-        f.write(dump_string)
+        dump_string = json.dumps(object_info, ensure_ascii=False)
+        with open("object_info.json", "w") as f:
+            f.write(dump_string)
+        sleep(5)
 
     print(stdevs)
         
