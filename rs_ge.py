@@ -68,7 +68,6 @@ def main():
 
     print(stdevs)
 
-        
 
 if __name__ == "__main__":
     main()
