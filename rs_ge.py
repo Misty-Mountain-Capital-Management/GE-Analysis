@@ -20,8 +20,12 @@ def description(id):
 def name(id):
     return((json.loads(info(id))['item']['name']))
 
-def get_data(id):
-    item_json = json.loads(requests.get(graphstring % id).text)['daily']
+def normalize(data):
+    maximum = max(data)
+    return [i/maximum for i in data]
+
+def get_data(id, normalized=True):
+    item_json = json.loads(requests.get(graphstring % id, timeout=30).text)['daily']
     stamps = []
     for s in item_json.keys():
         stamps.append((s, item_json[s]))
@@ -29,14 +33,21 @@ def get_data(id):
     stamps = sorted(stamps, key=lambda stamp: int(stamp[0])) # Sort the list by its date in ascending order.
 
     prices = [s[1] for s in stamps] # get prices from stamps
-
-    print("The minimum price over the past 180 days for %s is: %s" % (str(id), str(min(prices))))
     average = int(sum(prices) / len(prices))
+    min_price = min(prices)
+    max_price = max(prices)
+    if normalized:
+        normalized_prices = normalize(prices)
+
+    print("The minimum price over the past 180 days for %s is: %s" % (str(id), str(min_price)))
     print("The average price is: " + str(average))
-    stdev = np.std(prices)
+    stdev = np.std(normalized_prices) if normalized else np.std(prices)
     print("The standard deviation is %s." % str(stdev))
     
-    return {'prices':prices, 'min_price':min(prices), 'max_price':max(prices), 'avg_price':average, 'stdev':stdev}
+    if normalized:
+        return {'prices':normalized_prices, 'min_price':min_price, 'max_price':max_price, 'avg_price':average, 'stdev':stdev}
+    else:
+        return {'prices':prices, 'min_price':min_price, 'max_price':max_price, 'avg_price':average, 'stdev':stdev}
 
 def getrend(id):
     print(str(json.loads(info(id))['item']))
@@ -56,6 +67,7 @@ def main():
         sleep(5)
 
     print(stdevs)
+
         
 
 if __name__ == "__main__":
