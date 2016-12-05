@@ -26,14 +26,11 @@ def normalize(data):
 
 def get_data(id, normalized=False):
     from time import sleep
-    for _ in range(0, 100):
-        try:
-            item_json = json.loads(requests.get(graphstring % id, timeout=30).text)['daily']
-            break
-        except json.decoder.JSONDecodeError:
-            print("Failed to connect for id #%s, trying again." % id)
-            sleep(10)
-            continue
+    try:
+        item_json = json.loads(requests.get(graphstring % id, timeout=30).text)['daily']
+    except json.decoder.JSONDecodeError:
+        print("Failed to connect for id #%s." % id)
+        return None
 
     stamps = []
     for s in item_json.keys():
@@ -71,6 +68,9 @@ def main():
         json_data = json_data[int(sys.argv[1]):]
     for item in json_data:
         new_obj_data = get_data(item['id'])
+        if new_obj_data == None:
+            continue
+        
         object_info[item['name']] = new_obj_data
 
         dump_string = json.dumps(object_info, ensure_ascii=False)
