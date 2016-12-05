@@ -24,8 +24,17 @@ def normalize(data):
     maximum = max(data)
     return [i/maximum for i in data]
 
-def get_data(id, normalized=True):
-    item_json = json.loads(requests.get(graphstring % id, timeout=30).text)['daily']
+def get_data(id, normalized=False):
+    from time import sleep
+    for _ in range(0, 100):
+        try:
+            item_json = json.loads(requests.get(graphstring % id, timeout=30).text)['daily']
+            break
+        except json.decoder.JSONDecodeError:
+            print("Failed to connect for id #%s, trying again." % id)
+            sleep(10)
+            continue
+
     stamps = []
     for s in item_json.keys():
         stamps.append((s, item_json[s]))
