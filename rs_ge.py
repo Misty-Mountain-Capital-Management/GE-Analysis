@@ -66,6 +66,9 @@ def main():
     json_text = open("objects.json", "r").read()
     json_data = json.loads(json_text)
     object_info = {}
+    if sys.argv[1]:
+        object_info = json.loads(open("object_info.json", "r").read())
+        json_data = json_data[int(sys.argv[1]):]
     for item in json_data:
         new_obj_data = get_data(item['id'])
         object_info[item['name']] = new_obj_data
@@ -75,7 +78,7 @@ def main():
             f.write(dump_string)
         sleep(5)
 
-    print(stdevs)
+    print("Finished.")
 
 
 if __name__ == "__main__":
