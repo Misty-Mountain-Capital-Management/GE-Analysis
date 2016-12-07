@@ -45,10 +45,11 @@ def get_data(id, normalized=False):
     if normalized:
         normalized_prices = normalize(prices)
 
-    print("The minimum price over the past 180 days for %s is: %s" % (str(id), str(min_price)))
-    print("The average price is: " + str(average))
     stdev = np.std(normalized_prices) if normalized else np.std(prices)
-    print("The standard deviation is %s." % str(stdev))
+    if __name__ == "__main__":
+        print("The minimum price over the past 180 days for %s is: %s" % (str(id), str(min_price)))
+        print("The average price is: " + str(average))
+        print("The standard deviation is %s." % str(stdev))
     
     if normalized:
         return {'prices':normalized_prices, 'min_price':min_price, 'max_price':max_price, 'avg_price':average, 'stdev':stdev}
